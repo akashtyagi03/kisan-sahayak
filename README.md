@@ -56,4 +56,22 @@ Multer: For handling image uploads.
 Zod: For data validation.
 
 🚀 Getting Started
-Instructions on how to set up and run this project locally will be added soon.
+To get a local copy up and running, please follow these simple steps.
+
+Prerequisites
+Node.js and npm
+
+MongoDB account
+
+API keys for OpenAI and WeatherAPI
+
+Installation
+Clone the repo
+
+git clone [https://github.com/akashtyagi03/kisan-sahayak.git](https://github.com/akashtyagi03/kisan-sahayak.git)
+
+Install NPM packages for both frontend and backend directories.
+
+Create a .env file in the backend directory and add the required API keys.
+
+Run the development server.

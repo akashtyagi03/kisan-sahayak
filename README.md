@@ -1,78 +1,60 @@
-Kisan-Sahayak - AI Farming Assistant 🌾
+# 🌾 Crop Recommendation System
 
-Kisan-Sahayak is a modern, AI-powered web application designed to support Indian farmers by providing them with the data and tools needed to make informed decisions. This project aims to bridge the technology gap in agriculture by offering a suite of intelligent features on a simple and accessible platform.
+This project predicts the most suitable crop for a given location using **real-time weather data**, **soil information**, and **gpt api**.
 
-This project was developed as a part of the Smart India Hackathon (SIH).
+---
 
-✨ Key Features
-This application provides four core modules to assist farmers:
+## 🚀 Features
 
-🤖 AI Crop Recommendation:
+- 🌍 **Interactive Map** – Select your farm location or use your current GPS.
+- ☁️ **Live Weather Integration** – Fetches real-time temperature, humidity, and rainfall using the WeatherAPI.
+- 🧠 **AI Crop Prediction** – Backend model suggests the most suitable crop for that region.
+- 💾 **MongoDB Integration** – Stores soil and district data for accurate recommendations.
+- 🧭 **Reverse Geocoding** – Automatically detects the district name from your map location.
 
-Leverages real-time weather data and location-specific soil nutrient data (N, P, K, pH).
+---
 
-Uses a Large Language Model (GPT-4) to provide the top 3 most suitable and profitable crop recommendations for the current season, complete with justifications.
+## 🧩 Tech Stack
 
-🌿 AI Disease Detection:
+**Frontend:**
+- React + Vite
+- Tailwind CSS
+- React Leaflet (Map)
+- Axios
 
-Upload an image of a crop leaf and receive an instant diagnosis.
+**Backend:**
+- Node.js + Express
+- MongoDB (Mongoose)
+- Python (Flask ML model)
+- WeatherAPI for live climate data
 
-The AI identifies the disease and provides a detailed advisory in both Hindi and English, including symptoms, organic/chemical treatments, and prevention tips.
+---
 
-💬 Farmer Chatbot:
+## ⚙️ Setup Instructions
 
-An interactive chatbot (powered by a Python backend) trained to answer a wide range of agricultural questions.
+### 1. Clone the repository
+git clone https://github.com/yourusername/crop-recommendation-system.git
+cd crop-recommendation-system
 
-☀️ Weather Alerts:
+### 📦 Install Dependencies
+**Backend:**
+cd backend
+npm install
 
-Provides real-time weather updates and forecasts based on the farmer's location to help them plan their activities.
+**frontend:**
+cd frontend
+npm install  
 
-🛠️ Tech Stack
-This project is built with a modern MERN-stack architecture.
+### 📦 Setup Environment Variables
+MONGO_URI=your_mongodb_connection_string
+WEATHER_API_KEY=your_weatherapi_key
+PORT=3000
 
-Frontend
-React: For building the user interface.
+▶️ Run the Application
+## For backend
+cd backend
+npm run dev
 
-Vite: As a fast build tool.
-
-Tailwind CSS: For styling.
-
-Axios: For making API requests.
-
-Backend
-Node.js & Express.js: For the core server logic.
-
-TypeScript: For type safety and robust code.
-
-MongoDB: As the database for storing user and soil data.
-
-Mongoose: For interacting with MongoDB.
-
-OpenAI API (GPT-4): Powers the crop recommendation and disease detection features.
-
-JWT (JSON Web Tokens): For secure user authentication.
-
-Multer: For handling image uploads.
-
-Zod: For data validation.
-
-🚀 Getting Started
-To get a local copy up and running, please follow these simple steps.
-
-Prerequisites
-Node.js and npm
-
-MongoDB account
-
-API keys for OpenAI and WeatherAPI
-
-Installation
-Clone the repo
-
-git clone [https://github.com/akashtyagi03/kisan-sahayak.git](https://github.com/akashtyagi03/kisan-sahayak.git)
-
-Install NPM packages for both frontend and backend directories.
-
-Create a .env file in the backend directory and add the required API keys.
-
-Run the development server.
+## For frontend
+cd ../frontend
+npm run dev

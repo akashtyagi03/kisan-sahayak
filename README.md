@@ -1,4 +1,5 @@
 Kisan-Sahayak - AI Farming Assistant 🌾
+
 Kisan-Sahayak is a modern, AI-powered web application designed to support Indian farmers by providing them with the data and tools needed to make informed decisions. This project aims to bridge the technology gap in agriculture by offering a suite of intelligent features on a simple and accessible platform.
 
 This project was developed as a part of the Smart India Hackathon (SIH).

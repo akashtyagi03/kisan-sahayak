@@ -96,21 +96,18 @@ export function CropPrediction({location,setLocation}) {
             const response = await axios.get("http://localhost:3000/api/reverse-geocode", {
                 params: { lat: location.latitude, lon: location.longitude }
             });
-            console.log("response",response.data)
 
             const apiResponse = await axios.get("http://localhost:3000/api/v1/crop_prediction", {
                 params: { dist: response.data.address?.state_district } // pass district from reverse geocode
             });
-            console.log("Prediction API response:", apiResponse.data);
 
-            const recommendedCrop = apiResponse.data.crop;
-            setTimeout(() => {
-                const fetchedRecs = [
-                    { crop: recommendedCrop, suitability: 'Recommended', reason: 'Based on AI prediction using soil and weather data.' }
-                ];
-                setRecommendations(fetchedRecs);
+            // 3. Store the entire recommendations array in state
+            if (apiResponse.data && apiResponse.data.recommendations) {
+                setRecommendations(apiResponse.data.recommendations);
                 setIsLoadingRecs(false);
-            }, 1500);
+            } else {
+                throw new Error("Received an invalid format for recommendations.");
+            }
         } catch (error) {
             console.error("Error fetching recommendations:", error.message);
         } finally {
@@ -186,26 +183,24 @@ export function CropPrediction({location,setLocation}) {
                 )}
             </button>
 
-            {/* --- NEW: Recommendation Results Display --- */}
+            {/* NEW: Recommendation Results Display */}
             {recommendations && (
                 <div className="mt-8">
-                    <h4 className="text-xl font-bold text-gray-800 mb-4 text-left">Top Crop Recommendations</h4>
-                    <div className="space-y-4">
-                        {recommendations.map((rec) => (
-                            <div key={rec.crop} className="bg-gray-50 border border-gray-200 p-4 rounded-lg text-left">
-                                <div className="flex justify-between items-center">
-                                    <h5 className="text-lg font-semibold text-gray-900">{rec.crop}</h5>
-                                    <span className={`px-3 py-1 text-sm font-medium rounded-full ${rec.suitability === 'Excellent' ? 'bg-green-100 text-green-800' :
-                                        rec.suitability === 'Good' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
-                                        }`}>
-                                        {rec.suitability}
-                                    </span>
-                                </div>
-                                <p className="text-gray-600 mt-2">{rec.reason}</p>
+                <h4 className="text-xl font-bold text-gray-800 mb-4 text-left">Top Crop Recommendations</h4>
+                <div className="space-y-4">
+                    {recommendations.map((rec) => (
+                        <div key={rec.crop_name} className="bg-gray-50 border border-gray-200 p-4 rounded-lg text-left shadow-sm">
+                            <div className="flex justify-between items-center">
+                                <h5 className="text-lg font-semibold text-gray-900">{rec.crop_name}</h5>
+                                <span className="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800">
+                                    Recommended
+                                </span>
                             </div>
-                        ))}
-                    </div>
+                            <p className="text-gray-600 mt-2">{rec.justification}</p>
+                        </div>
+                    ))}
                 </div>
+            </div>
             )}
         </div>
     );

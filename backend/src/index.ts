@@ -159,20 +159,35 @@ app.get("/api/v1/crop_prediction", async (req: Request, res: Response) => {
         if (humidity === undefined || temperature === undefined || rainfall === undefined) {
             return res.status(500).json({ error: "Incomplete weather data received." });
         }
-
-        const prompt = `Act as an expert Indian agronomist. The current date is ${new Date().toDateString()}.
-        A farmer in the ${districtData.District_Name} district of India needs a crop recommendation.
+        const prompt = `
+        Act as an expert Indian agronomist providing advice for the date: ${new Date().toDateString()}.
+        A farmer in the ${districtData.District_Name} district of India needs crop recommendations.
         
-        Here is the available data:
+        Here is the detailed farm data:
         - Soil Nutrients: N=${districtData.N_Value}, P=${districtData.P_Value}, K=${districtData.K_Value}
         - Soil pH: ${districtData.pH_Value}
+        - Soil Type: Alluvial Soil (Typical for this region)
         - Real-time Weather: Temperature=${temperature}°C, Humidity=${humidity}%, Rainfall=${rainfall}mm
+        - Previous Crop Grown: Not specified. Please consider crop rotation.
         
-        Considering the current date (which determines the season - Rabi or Kharif) and all the data above,
-        what is the single best crop for this farmer to plant right now?
+        Based on all this data, provide the top 3 most suitable and profitable crops for the farmer to plant right now for the upcoming season (Rabi/Kharif).
         
-        Respond with ONLY a JSON object with a single key: "crop".
-        Example: { "crop": "Wheat (Gehu)" }
+        Respond with ONLY a valid JSON object. The object must have a single key "recommendations", which is an array of objects.
+        Each object in the array must have two keys: "crop_name" and "justification".
+        
+        Example format:
+        {
+          "recommendations": [
+            {
+              "crop_name": "Crop 1 (Hindi Name)",
+              "justification": "Brief reason why this crop is a good choice based on the data."
+            },
+            {
+              "crop_name": "Crop 2 (Hindi Name)",
+              "justification": "Another brief reason."
+            }
+          ]
+        }
     `;
 
         const completion = await openai.chat.completions.create({

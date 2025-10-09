@@ -93,12 +93,18 @@ export function CropPrediction({location,setLocation}) {
         setIsLoadingRecs(true);
         setRecommendations(null);
         try {
-            const response = await axios.get("http://localhost:3000/api/reverse-geocode", {
-                params: { lat: location.latitude, lon: location.longitude }
-            });
+            const response = await axios.get("http://localhost:3000/api/v1/reverse-geocode", {
+                params: { lat: location.latitude, lon: location.longitude },
+                headers: {
+                    "authorization": `Bearer ${localStorage.getItem("token")}`
+                }
+            },);
 
             const apiResponse = await axios.get("http://localhost:3000/api/v1/crop_prediction", {
-                params: { dist: response.data.address?.state_district } // pass district from reverse geocode
+                params: { dist: response.data.address?.state_district }, // pass district from reverse geocode
+                headers: {
+                    "authorization": `Bearer ${localStorage.getItem("token")}`
+                }
             });
 
             // 3. Store the entire recommendations array in state
@@ -122,7 +128,7 @@ export function CropPrediction({location,setLocation}) {
                 Our AI analyzes soil and weather data based on your selected location to recommend the most profitable and suitable crops. Maximize your yield and minimize risks.
             </p>
 
-            {/* --- Interactive Map Integration --- */}
+            {/* Interactive Map Integration*/}
             <div className="relative w-full h-80 md:h-96 bg-gray-200 rounded-lg mb-4 overflow-hidden border-2 border-gray-300">
                 <MapContainer
                     center={defaultPosition}

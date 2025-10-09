@@ -11,6 +11,7 @@ import fs from 'fs';
 import path from 'path';
 import cors from 'cors';
 import OpenAI from "openai";
+import { authMiddleware } from './middleware';
 
 // --- SETUP ---
 const app = express();
@@ -116,7 +117,7 @@ app.post('/api/v1/signin', async (req: Request, res: Response) => {
 });
 
 // API ROUTES
-app.get("/api/reverse-geocode", async (req: Request, res: Response) => {
+app.get("/api/v1/reverse-geocode", authMiddleware, async (req: Request, res: Response) => {
     const querySchema = z.object({ lat: z.string(), lon: z.string() });
     const result = querySchema.safeParse(req.query);
     if (!result.success) {
@@ -136,7 +137,7 @@ app.get("/api/reverse-geocode", async (req: Request, res: Response) => {
     }
 });
 
-app.get("/api/v1/crop_prediction", async (req: Request, res: Response) => {
+app.get("/api/v1/crop_prediction", authMiddleware, async (req: Request, res: Response) => {
     const querySchema = z.object({ dist: z.string().min(1) });
     const result = querySchema.safeParse(req.query);
 
@@ -214,25 +215,25 @@ app.get("/api/v1/crop_prediction", async (req: Request, res: Response) => {
     }
 });
 
-app.post('/chat', async (req: Request, res: Response) => {
-    const bodySchema = z.object({ query: z.string().min(1) });
-    const result = bodySchema.safeParse(req.body);
-    if (!result.success) {
-        return res.status(400).json({ error: "Query is required" });
-    }
-    const { query } = result.data;
+// app.post('/cha', async (req: Request, res: Response) => {
+//     const bodySchema = z.object({ query: z.string().min(1) });
+//     const result = bodySchema.safeParse(req.body);
+//     if (!result.success) {
+//         return res.status(400).json({ error: "Query is required" });
+//     }
+//     const { query } = result.data;
 
-    try {
-        // Assuming your Python service is running on localhost:5000
-        const response = await axios.post('http://localhost:5000/chat', { query });
-        res.json({ answer: response.data.answer });
-    } catch (error) {
-        console.error('Error communicating with chatbot service:', error);
-        res.status(500).json({ error: "Failed to get response from chatbot service" });
-    }
-});
+//     try {
+//         // Assuming your Python service is running on localhost:5000
+//         const response = await axios.post('http://localhost:5000/chat', { query });
+//         res.json({ answer: response.data.answer });
+//     } catch (error) {
+//         console.error('Error communicating with chatbot service:', error);
+//         res.status(500).json({ error: "Failed to get response from chatbot service" });
+//     }
+// });
 
-app.post("/api/v1/predict-disease-detailed", upload.single('image'), async (req: Request, res: Response) => {
+app.post("/api/v1/predict-disease-detailed", authMiddleware, upload.single('image'), async (req: Request, res: Response) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: "No image file uploaded." });

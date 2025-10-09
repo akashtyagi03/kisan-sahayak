@@ -241,7 +241,7 @@ export default function Landing() {
                     </div>
                 </section>
 
-                {/* ===== Weather Section ===== */}
+                {/* Weather Section */}
                 <section id="weather" className="py-20 bg-gradient-to-r from-blue-50 via-white to-blue-50">
                     <div className="container mx-auto px-6 text-center">
                         <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
@@ -257,7 +257,7 @@ export default function Landing() {
                     </div>
                 </section>
 
-                {/* ===== BEAUTIFIED MARKET RATE SECTION ===== */}
+                {/* MARKET RATE SECTION */}
                 <section id="market-rates" className="py-20 bg-gradient-to-b from-green-50 to-white relative">
                     <div className="container mx-auto px-6">
                         {/* Heading */}
@@ -394,7 +394,7 @@ export default function Landing() {
             </main>
             <Footer />
 
-            <Chatbot /> {/* Add the Chatbot component here */}
+            {/* <Chatbot /> Add the Chatbot component here */}
         </div>
     );
 }

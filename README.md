@@ -1,0 +1,60 @@
+# 🌾 Crop Recommendation System
+
+This project predicts the most suitable crop for a given location using **real-time weather data**, **soil information**, and **gpt api**.
+
+---
+
+## 🚀 Features
+
+- 🌍 **Interactive Map** – Select your farm location or use your current GPS.
+- ☁️ **Live Weather Integration** – Fetches real-time temperature, humidity, and rainfall using the WeatherAPI.
+- 🧠 **AI Crop Prediction** – Backend model suggests the most suitable crop for that region.
+- 💾 **MongoDB Integration** – Stores soil and district data for accurate recommendations.
+- 🧭 **Reverse Geocoding** – Automatically detects the district name from your map location.
+
+---
+
+## 🧩 Tech Stack
+
+**Frontend:**
+- React + Vite
+- Tailwind CSS
+- React Leaflet (Map)
+- Axios
+
+**Backend:**
+- Node.js + Express
+- MongoDB (Mongoose)
+- Python (Flask ML model)
+- WeatherAPI for live climate data
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1. Clone the repository
+git clone https://github.com/yourusername/crop-recommendation-system.git
+cd crop-recommendation-system
+
+### 📦 Install Dependencies
+**Backend:**
+cd backend
+npm install
+
+**frontend:**
+cd frontend
+npm install  
+
+### 📦 Setup Environment Variables
+MONGO_URI=your_mongodb_connection_string
+WEATHER_API_KEY=your_weatherapi_key
+PORT=3000
+
+▶️ Run the Application
+## For backend
+cd backend
+npm run dev
+
+## For frontend
+cd ../frontend
+npm run dev

@@ -8,7 +8,7 @@ This project predicts the most suitable crop for a given location using **real-t
 
 - 🌍 **Interactive Map** – Select your farm location or use your current GPS.
 - ☁️ **Live Weather Integration** – Fetches real-time temperature, humidity, and rainfall using the WeatherAPI.
-- 🧠 **AI Crop Prediction** – Backend model suggests the most suitable crop for that region.
+- 🧠 **AI Crop Prediction** – GPT api suggests the most suitable crop for that region.
 - 💾 **MongoDB Integration** – Stores soil and district data for accurate recommendations.
 - 🧭 **Reverse Geocoding** – Automatically detects the district name from your map location.
 
@@ -23,10 +23,11 @@ This project predicts the most suitable crop for a given location using **real-t
 - Axios
 
 **Backend:**
-- Node.js + Express
+- Typescript
+- Node.js + Express 
 - MongoDB (Mongoose)
-- Python (Flask ML model)
 - WeatherAPI for live climate data
+- GPT api
 
 ---
 

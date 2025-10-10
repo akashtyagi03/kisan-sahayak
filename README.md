@@ -34,28 +34,37 @@ This project predicts the most suitable crop for a given location using **real-t
 ## ⚙️ Setup Instructions
 
 ### 1. Clone the repository
-git clone https://github.com/yourusername/crop-recommendation-system.git
-cd crop-recommendation-system
+git clone https://github.com/akashtyagi03/kisan-sahayak.git
+
+cd kisan-sahayak
 
 ### 📦 Install Dependencies
 **Backend:**
 cd backend
+
 npm install
 
 **frontend:**
 cd frontend
+
 npm install  
 
 ### 📦 Setup Environment Variables
 MONGO_URI=your_mongodb_connection_string
+
 WEATHER_API_KEY=your_weatherapi_key
+
+OPENAI_API_KEY=your_openapi_key
+
 PORT=3000
 
 ▶️ Run the Application
 ## For backend
 cd backend
+
 npm run dev
 
 ## For frontend
 cd ../frontend
+
 npm run dev

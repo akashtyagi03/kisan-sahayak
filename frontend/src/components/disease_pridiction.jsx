@@ -70,8 +70,8 @@ export function Prediction() {
             formData.append('image', selectedFile);
 
             const response = await axios.post(`${API_BASE_URL}/api/v1/predict-disease-detailed`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
                 headers: {
+                    'Content-Type': 'multipart/form-data' ,
                     "Authorization": `Bearer ${localStorage.getItem("token")}`
                 }
             });

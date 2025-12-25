@@ -126,9 +126,8 @@ app.get("/api/v1/reverse-geocode", authMiddleware, async (req: Request, res: Res
     const { lat, lon } = result.data;
 
     try {
-        const response = await axios.get("https://nominatim.openstreetmap.org/reverse", {
-            params: { lat, lon, format: "json" },
-            headers: { "User-Agent": "Kisan-Sahayak/1.0 (contact@example.com)" }
+        const response = await axios.get("https://eu1.locationiq.com/v1/reverse", {
+            params: { key: process.env.LOCATIONIQ_API_KEY, lat, lon, format: "json" },
         });
         res.json(response.data);
     } catch (error) {
@@ -214,24 +213,6 @@ app.get("/api/v1/crop_prediction", authMiddleware, async (req: Request, res: Res
         res.status(500).json({ error: "Server error while fetching crop prediction data" });
     }
 });
-
-// app.post('/cha', async (req: Request, res: Response) => {
-//     const bodySchema = z.object({ query: z.string().min(1) });
-//     const result = bodySchema.safeParse(req.body);
-//     if (!result.success) {
-//         return res.status(400).json({ error: "Query is required" });
-//     }
-//     const { query } = result.data;
-
-//     try {
-//         // Assuming your Python service is running on localhost:5000
-//         const response = await axios.post('http://localhost:5000/chat', { query });
-//         res.json({ answer: response.data.answer });
-//     } catch (error) {
-//         console.error('Error communicating with chatbot service:', error);
-//         res.status(500).json({ error: "Failed to get response from chatbot service" });
-//     }
-// });
 
 app.post("/api/v1/predict-disease-detailed", authMiddleware, upload.single('image'), async (req: Request, res: Response) => {
     try {

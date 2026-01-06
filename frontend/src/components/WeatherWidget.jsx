@@ -5,41 +5,32 @@ import axios from "axios";
 // This is a self-contained Weather Widget component.￼
 
 export default function WeatherWidget() {
-  // State for the location to fetch weather for. Initialized to "Meerut".
   const [location, setLocation] = useState("Meerut");
-  // State to hold the weather data from the API.
   const [weather, setWeather] = useState(null);
-  // State to manage the loading status.
   const [loading, setLoading] = useState(true);
-  // State to hold any error messages.
   const [error, setError] = useState("");
-  // State for the text input field, allowing users to type a new location.
   const [inputLocation, setInputLocation] = useState("Meerut");
 
   // Fetches weather data from the WeatherAPI for a given district.
   const fetchWeather = async (district) => {
-    // If no district is provided, set an error and stop.
     if (!district) {
       setError("Please enter a location.");
       setLoading(false);
       return;
     }
-    // Set loading to true and clear previous errors/weather data.
+
     setLoading(true);
     setError("");
     setWeather(null);
 
     try {
-      // Use the provided API key and district to make the request.
       const res = await axios.get(
         `https://api.weatherapi.com/v1/current.json?key=3ad23bda0dec40069df193439251409&q=${district}`
       );
-      setWeather(res.data); // Store the successful response.
+      setWeather(res.data); 
     } catch (err) {
-      // If the API call fails, set an informative error message.
       setError(`Failed to load weather data for "${district}". Please check the spelling or try another location.`);
     } finally {
-      // Set loading to false once the request is complete (either success or failure).
       setLoading(false);
     }
   };
@@ -47,13 +38,11 @@ export default function WeatherWidget() {
   // This useEffect hook runs on the initial render and whenever the `location` state changes.
   useEffect(() => {
     fetchWeather(location);
-  }, [location]); // The dependency array ensures this effect is re-run when `location` is updated.
+  }, [location]);
 
-  // Handles the form submission when the user searches for a new location.
   const handleSubmit = (e) => {
     e.preventDefault(); // Prevents the default form submission behavior (page reload).
     if (inputLocation.trim() !== "") {
-      // Update the main `location` state, which will trigger the useEffect to fetch new data.
       setLocation(inputLocation);
     }
   };

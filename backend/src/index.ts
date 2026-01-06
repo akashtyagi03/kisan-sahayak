@@ -17,7 +17,7 @@ import { authMiddleware } from './middleware';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-if (!process.env.OPENAI_API_KEY || !process.env.JWT_SECRET ) {
+if (!process.env.OPENAI_API_KEY || !process.env.JWT_SECRET) {
     throw new Error("Required environment variables (OPENAI_API_KEY, JWT_SECRET, WEATHER_API_KEY) are not set!");
 }
 
@@ -155,10 +155,12 @@ app.get("/api/v1/crop_prediction", authMiddleware, async (req: Request, res: Res
         const districtData = mongooseDoc.toObject();
 
         const weatherResponse = await axios.get(`http://api.weatherapi.com/v1/current.json?key=3ad23bda0dec40069df193439251409&q=${dist}`);
+
         const { temp_c: temperature, humidity, precip_mm: rainfall } = weatherResponse.data?.current || {};
         if (humidity === undefined || temperature === undefined || rainfall === undefined) {
             return res.status(500).json({ error: "Incomplete weather data received." });
         }
+
         const prompt = `
         Act as an expert Indian agronomist providing advice for the date: ${new Date().toDateString()}.
         A farmer in the ${districtData.District_Name} district of India needs crop recommendations.

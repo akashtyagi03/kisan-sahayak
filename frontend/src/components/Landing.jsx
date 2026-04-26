@@ -154,10 +154,8 @@ export default function Landing() {
         <div className="bg-gray-50 font-sans antialiased text-gray-900">
             {/* Header */}
             <Header />
-
             <main>
                 {/* Hero Section */}
-
                 <section
                     className="relative min-h-screen flex items-center justify-center bg-cover bg-center"
                     style={{
@@ -205,7 +203,6 @@ export default function Landing() {
                     </div>
                 </section>
 
-
                 {/* Core Functionality Section */}
                 <section id="features" className="py-20 bg-white">
                     <div className="container mx-auto px-6">
@@ -233,7 +230,7 @@ export default function Landing() {
                             </div>
 
                             <div className="p-8 md:p-12">
-                                {activeTab === 'recommendation' && (<CropPrediction  location={location} setLocation={setLocation}/>)}
+                                {activeTab === 'recommendation' && (<CropPrediction location={location} setLocation={setLocation} />)}
 
                                 {activeTab === 'prediction' && <Prediction />}
                             </div>
@@ -252,7 +249,7 @@ export default function Landing() {
                         </p>
 
                         <div className="max-w-lg mx-auto">
-                        <WeatherWidget location={location} setLocation={setLocation}  />
+                            <WeatherWidget location={location} setLocation={setLocation} />
                         </div>
                     </div>
                 </section>

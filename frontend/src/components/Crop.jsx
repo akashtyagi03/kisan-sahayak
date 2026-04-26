@@ -37,7 +37,7 @@ function RecenterAutomatically({ location }) {
     return null;
 }
 
-export function CropPrediction({location,setLocation}) {
+export function CropPrediction({ location, setLocation }) {
     const [isLocating, setIsLocating] = useState(false);
     const [locationError, setLocationError] = useState('');
     const [recommendations, setRecommendations] = useState(null);
@@ -192,21 +192,21 @@ export function CropPrediction({location,setLocation}) {
             {/* NEW: Recommendation Results Display */}
             {recommendations && (
                 <div className="mt-8">
-                <h4 className="text-xl font-bold text-gray-800 mb-4 text-left">Top Crop Recommendations</h4>
-                <div className="space-y-4">
-                    {recommendations.map((rec) => (
-                        <div key={rec.crop_name} className="bg-gray-50 border border-gray-200 p-4 rounded-lg text-left shadow-sm">
-                            <div className="flex justify-between items-center">
-                                <h5 className="text-lg font-semibold text-gray-900">{rec.crop_name}</h5>
-                                <span className="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800">
-                                    Recommended
-                                </span>
+                    <h4 className="text-xl font-bold text-gray-800 mb-4 text-left">Top Crop Recommendations</h4>
+                    <div className="space-y-4">
+                        {recommendations.map((rec) => (
+                            <div key={rec.crop_name} className="bg-gray-50 border border-gray-200 p-4 rounded-lg text-left shadow-sm">
+                                <div className="flex justify-between items-center">
+                                    <h5 className="text-lg font-semibold text-gray-900">{rec.crop_name}</h5>
+                                    <span className="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800">
+                                        Recommended
+                                    </span>
+                                </div>
+                                <p className="text-gray-600 mt-2">{rec.justification}</p>
                             </div>
-                            <p className="text-gray-600 mt-2">{rec.justification}</p>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
-            </div>
             )}
         </div>
     );

@@ -175,7 +175,7 @@ app.get("/api/v1/crop_prediction", authMiddleware, async (req: Request, res: Res
         Based on all this data, provide the top 3 most suitable and profitable crops for the farmer to plant right now for the upcoming season (Rabi/Kharif).
         
         Respond with ONLY a valid JSON object. The object must have a single key "recommendations", which is an array of objects.
-        Each object in the array must have two keys: "crop_name" and "justification".
+        Each object in the array must   have two keys: "crop_name" and "justification".
         
         Example format:
         {
@@ -189,7 +189,7 @@ app.get("/api/v1/crop_prediction", authMiddleware, async (req: Request, res: Res
               "justification": "Another brief reason."
             }
           ]
-        }
+        }x
     `;
 
         const completion = await openai.chat.completions.create({

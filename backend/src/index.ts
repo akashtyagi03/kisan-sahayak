@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import express, { Request, Response } from 'express';
 import { z } from 'zod';
 import mongoose from 'mongoose';
@@ -10,20 +10,132 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import cors from 'cors';
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { authMiddleware } from './middleware';
+
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 // --- SETUP ---
 const app = express();
 const PORT = process.env.PORT || 3000;
+const geminiApiKey = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY;
 
-if (!process.env.OPENAI_API_KEY || !process.env.JWT_SECRET) {
-    throw new Error("Required environment variables (OPENAI_API_KEY, JWT_SECRET, WEATHER_API_KEY) are not set!");
+if (!process.env.JWT_SECRET || !process.env.WEATHER_API_KEY || !geminiApiKey) {
+    throw new Error("Required environment variables (JWT_SECRET, WEATHER_API_KEY, GEMINI_API_KEY) are not set!");
 }
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(geminiApiKey as string);
+const textModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+const visionModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+type CropRecommendation = {
+    crop_name: string;
+    justification: string;
+};
+
+function getFallbackCropRecommendations(
+    temperature: number,
+    humidity: number,
+    rainfall: number,
+    district: string,
+    pH: number
+): { recommendations: CropRecommendation[]; source: string } {
+    const recommendations: CropRecommendation[] = [];
+
+    if (rainfall >= 80 || humidity >= 75) {
+        recommendations.push({
+            crop_name: "धान (Rice)",
+            justification: `High humidity/rainfall conditions in ${district} are suitable for paddy; ensure proper drainage and timely transplanting.`,
+        });
+    }
+
+    if (temperature >= 18 && temperature <= 30 && rainfall <= 90) {
+        recommendations.push({
+            crop_name: "गेहूं (Wheat)",
+            justification: `Current temperature and moderate rainfall are favorable for wheat establishment, especially with near-neutral soil pH (${pH}).`,
+        });
+    }
+
+    if (temperature >= 24 && rainfall <= 70) {
+        recommendations.push({
+            crop_name: "चना (Chickpea)",
+            justification: `Chickpea performs well in warm-to-moderate weather with controlled moisture and gives good market returns with low input cost.`,
+        });
+    }
+
+    if (recommendations.length < 3) {
+        recommendations.push({
+            crop_name: "सरसों (Mustard)",
+            justification: `Suitable for relatively lower water requirement and can be a profitable rotation crop under current weather pattern.`,
+        });
+    }
+
+    if (recommendations.length < 3) {
+        recommendations.push({
+            crop_name: "बाजरा (Pearl Millet)",
+            justification: `Millet is resilient in variable weather and supports risk reduction when rainfall becomes uncertain.`,
+        });
+    }
+
+    return {
+        recommendations: recommendations.slice(0, 3),
+        source: "fallback_rules",
+    };
+}
+
+function extractJsonText(content: string): string {
+    const trimmed = content.trim();
+    const fencedMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    if (fencedMatch?.[1]) {
+        return fencedMatch[1].trim();
+    }
+    return trimmed;
+}
+
+async function generateGeminiJson(prompt: string): Promise<string> {
+    const result = await textModel.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
+            responseMimeType: 'application/json',
+        },
+    });
+
+    const text = result.response.text();
+    if (!text) {
+        throw new Error('Gemini returned an empty response.');
+    }
+
+    return extractJsonText(text);
+}
+
+async function generateGeminiVisionJson(prompt: string, imageBuffer: Buffer, mimeType: string): Promise<string> {
+    const result = await visionModel.generateContent({
+        contents: [
+            {
+                role: 'user',
+                parts: [
+                    { text: prompt },
+                    {
+                        inlineData: {
+                            data: imageBuffer.toString('base64'),
+                            mimeType,
+                        },
+                    },
+                ],
+            },
+        ],
+        generationConfig: {
+            responseMimeType: 'application/json',
+        },
+    });
+
+    const text = result.response.text();
+    if (!text) {
+        throw new Error('Gemini returned an empty response.');
+    }
+
+    return extractJsonText(text);
+}
 
 app.use(cors());
 app.use(express.json());
@@ -145,6 +257,10 @@ app.get("/api/v1/crop_prediction", authMiddleware, async (req: Request, res: Res
     }
     const { dist } = result.data;
 
+    if (!process.env.WEATHER_API_KEY) {
+        return res.status(500).json({ error: "WEATHER_API_KEY is not configured on the server." });
+    }
+
     try {
         const mongooseDoc = await Data.findOne({
             District_Name: { $regex: new RegExp(`^${dist}$`, 'i') }
@@ -154,7 +270,13 @@ app.get("/api/v1/crop_prediction", authMiddleware, async (req: Request, res: Res
         }
         const districtData = mongooseDoc.toObject();
 
-        const weatherResponse = await axios.get(`http://api.weatherapi.com/v1/current.json?key=3ad23bda0dec40069df193439251409&q=${dist}`);
+        const weatherResponse = await axios.get("https://api.weatherapi.com/v1/current.json", {
+            params: {
+                key: process.env.WEATHER_API_KEY,
+                q: dist,
+            },
+            timeout: 10000,
+        });
 
         const { temp_c: temperature, humidity, precip_mm: rainfall } = weatherResponse.data?.current || {};
         if (humidity === undefined || temperature === undefined || rainfall === undefined) {
@@ -189,29 +311,46 @@ app.get("/api/v1/crop_prediction", authMiddleware, async (req: Request, res: Res
               "justification": "Another brief reason."
             }
           ]
-        }x
+                }
     `;
 
-        const completion = await openai.chat.completions.create({
-            model: "gpt-4.1-mini",
-            messages: [
-                { role: "system", content: "You are an expert agronomist AI that responds only in valid JSON based on the user's requested format." },
-                { role: "user", content: prompt }
-            ],
-            response_format: { type: "json_object" }
-        });
-
-        // FIXED: Safely access the API response
-        const content = completion.choices?.[0]?.message?.content;
-        if (!content) {
-            return res.status(500).json({ error: "Failed to get a valid response from the AI." });
+        try {
+            const content = await generateGeminiJson(prompt);
+            const recommendation = JSON.parse(content);
+            return res.json({ ...recommendation, source: "gemini" });
+        } catch (aiError) {
+            const geminiError = aiError as { status?: number; code?: string; message?: string };
+            const errorText = `${geminiError.message || ''} ${geminiError.code || ''}`.toLowerCase();
+            if (geminiError.status === 429 || errorText.includes('quota') || errorText.includes('rate')) {
+                const fallback = getFallbackCropRecommendations(
+                    temperature,
+                    humidity,
+                    rainfall,
+                    districtData.District_Name,
+                    districtData.pH_Value
+                );
+                return res.status(200).json({
+                    ...fallback,
+                    note: "Gemini quota exceeded or rate-limited. Returned rule-based recommendations.",
+                });
+            }
+            throw aiError;
         }
-
-        const recommendation = JSON.parse(content);
-        return res.json(recommendation);
 
     } catch (error) {
         console.error("Error fetching crop prediction:", error);
+
+        if (axios.isAxiosError(error)) {
+            if (error.code === 'ETIMEDOUT') {
+                return res.status(504).json({ error: "Weather API request timed out. Please try again." });
+            }
+
+            const providerMessage = (error.response?.data as { error?: { message?: string } } | undefined)?.error?.message;
+            return res.status(502).json({
+                error: providerMessage || "Failed to fetch weather data from provider.",
+            });
+        }
+
         res.status(500).json({ error: "Server error while fetching crop prediction data" });
     }
 });
@@ -222,38 +361,28 @@ app.post("/api/v1/predict-disease-detailed", authMiddleware, upload.single('imag
             return res.status(400).json({ error: "No image file uploaded." });
         }
         const imageBuffer = fs.readFileSync(req.file.path);
-        const base64Image = `data:${req.file.mimetype};base64,${imageBuffer.toString('base64')}`;
 
         const prompt = `You are an expert agronomist advising a farmer in India. 
          Analyze the provided crop leaf image, identify the most likely disease, and generate a JSON advisory.
          The JSON must have these keys: "disease_name", "summary", "symptoms", "organic_treatment", "chemical_treatment", "prevention_tips".
          Rules: Use Hindi (Devanagari) first, then English translation in parentheses. Summary should be 1 sentence. Symptoms, treatments, and prevention should be arrays of 1-2 short bullet points. Respond only with valid JSON.`;
 
-        const completion = await openai.chat.completions.create({
-            model: "gpt-4.1-mini",
-            messages: [
-                { role: "system", content: "You are an expert agronomist AI that responds only in valid JSON." },
-                {
-                    role: "user",
-                    content: [
-                        { type: "text", text: prompt },
-                        { type: "image_url", image_url: { url: base64Image } }
-                    ]
-                }
-            ],
-            response_format: { type: "json_object" }
-        });
-
-        // FIXED: Safely access the API response
-        const content = completion.choices?.[0]?.message?.content;
-        if (!content) {
+        const imageContent = await generateGeminiVisionJson(prompt, imageBuffer, req.file.mimetype);
+        if (!imageContent) {
             return res.status(500).json({ error: "Failed to get a valid response from the AI." });
         }
 
-        const advisoryData = JSON.parse(content);
+        const advisoryData = JSON.parse(imageContent);
         res.json({ advisory: advisoryData });
     } catch (error) {
         console.error("Error in disease prediction:", error);
+
+        const geminiError = error as { status?: number; code?: string; message?: string };
+        const errorText = `${geminiError.message || ''} ${geminiError.code || ''}`.toLowerCase();
+        if (geminiError.status === 429 || errorText.includes('quota') || errorText.includes('rate')) {
+            return res.status(429).json({ error: "Gemini quota exceeded. Please use a different key or wait before retrying." });
+        }
+
         res.status(500).json({ error: "Failed to generate advisory." });
     } finally {
         // Clean up the uploaded file
